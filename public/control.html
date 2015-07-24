@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<div class="button-container">
+		<button id="take-video5">Take 5s. video</button>
+	</div>
+	<div class="counter" style="position: absolute;top: 10%;font-size: 300px;text-align: center;width: 100%;color: black;">
+		
+	</div>
+	<script src="./lib/socket.io/socket.io-1.3.5.js"></script>
+	<script>
+	  var socket = io();
+	  var socketId = "";
+	  socket.emit('whoiam', "control", function(data){
+	  	socketId = data;
+	  	console.log("connected as display at socket %s", socketId);
+	  });
+
+	  socket.on('welcome', function(msg){
+	  	console.log(msg);
+	  })
+
+	</script>
+
+	<script type="text/javascript">
+	document.getElementById("take-video5").addEventListener("click", function(){
+		
+		displayCounter(function(){
+			socket.emit("takeVideo", '0:05');
+			displayCounter(null);
+		});
+	});
+
+	var displayCounter = function(callback){
+		var counter = document.getElementsByClassName('counter')[0];
+		var initialTime = 5;
+		var countInterval = setInterval(function(){
+			console.log(initialTime);
+			counter.innerHTML = initialTime--;
+			if(initialTime < 0){
+				clearInterval(countInterval);
+				counter.innerHTML = "";
+				callback && callback();
+			}
+		}, 1000);
+	};
+	</script>
+</body>
+</html>

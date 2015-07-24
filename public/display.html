@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<div class="video-container">
+		<video autoplay></video>
+	</div>
+	<div class="button-container">
+		<button id="take-video5">Take 5s. video</button>
+	</div>
+	<div class="counter" style="position: absolute;top: 10%;font-size: 300px;text-align: center;width: 100%;color: white;">
+		
+	</div>
+	<script src="./lib/socket.io/socket.io-1.3.5.js"></script>
+	<script>
+	  var socket = io();
+	  var socketId = "";
+	  socket.emit('whoiam', "display", function(data){
+	  	socketId = data;
+	  	console.log("connected as display at socket %s", socketId);
+	  });
+
+	  socket.on('welcome', function(msg){
+	  	console.log(msg);
+	  });
+
+	  socket.on('prepareVideo', function(time){
+		displayCounter(null);
+	  });
+
+	</script>
+
+	<script>
+		var errorCallback = function(e) {
+	    console.log('Reeeejected!', e);
+	  };
+
+	  // Not showing vendor prefixes.
+	  navigator.webkitGetUserMedia({video: true, audio: false}, function(localMediaStream) {
+	    var video = document.querySelector('video');
+	    video.src = window.URL.createObjectURL(localMediaStream);
+
+	    // Note: onloadedmetadata doesn't fire in Chrome when using it with getUserMedia.
+	    // See crbug.com/110938.
+	    video.onloadedmetadata = function(e) {
+	      // Ready to go. Do some stuff.
+	    };
+	  }, errorCallback);
+	</script>
+
+	<script type="text/javascript">
+	document.getElementById("take-video5").addEventListener("click", function(){
+		
+		displayCounter(function(){
+			socket.emit("takeVideo", '0:05');
+			displayCounter();
+		});
+	});
+
+	var displayCounter = function(callback){
+		var counter = document.getElementsByClassName('counter')[0];
+		var initialTime = 5;
+		var countInterval = setInterval(function(){
+			console.log(initialTime);
+			counter.innerHTML = initialTime--;
+			if(initialTime < 0){
+				clearInterval(countInterval);
+				counter.innerHTML = "";
+				callback && callback();
+			}
+		}, 1000);
+	};
+	</script>
+</body>
+</html>
